@@ -1,4 +1,5 @@
 
+#include <set>
 #include "genetic.h"
 
 Genetic::Genetic(int (*func)(std::vector<int>* values), int size_of_p = 100, int n_vars = 2){
@@ -30,6 +31,35 @@ std::vector<int>* Genetic::evaluatePopulation(){
     }
     return result_arr;
 }
+
+
+std::vector<int>* Genetic::mutation(std::vector<int>* individual, int upper_limit, int lower_limit,
+                           int muatation_rate, std::string method, double standard_deviation){
+    auto* gene = new std::vector<int>();
+    std::vector<int>* mutated_individual;
+    std::uniform_int_distribution<int> distribution3(0, 7);
+    gene->push_back(distribution3(generator));
+    for (int i = 0; i < muatation_rate - 1; i++){
+        gene->push_back(distribution3(generator));
+        while (std::set<int>( gene->begin(), gene->end() ).size() < gene->size()){
+            (*gene)[i] = distribution3(generator);
+        }
+        mutated_individual = new std::vector<int>((*individual));
+    }
+    if (method == "Reset"){
+        for(int x = 0; x < muatation_rate; x++){
+            std::uniform_int_distribution<int> distribution4(lower_limit, upper_limit);
+            (*mutated_individual)[x] = distribution4(generator);
+        }
+    }
+    return mutated_individual;
+
+
+
+
+}
+
+
 void Genetic::next_gen(){
     auto results = evaluatePopulation();
     auto children = new std::vector<std::vector<int>*>();
@@ -117,6 +147,8 @@ void Genetic::next_gen(){
         for(int i = 0; i < gens.size(); i++){
             new_child->push_back((*signs)[i] * stoi(gens[i], 0, 2));
         }
+
+        new_child = mutation(new_child, maxim, minim);
 
         children->push_back(new_child);
 
