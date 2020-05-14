@@ -7,9 +7,9 @@
 
 class Genetic{
 public:
-    Genetic(int (*f)(std::vector<int>* values), int pop_size, int n_variables);
+    Genetic(int (*f)(std::vector<int>* values), int pop_size, int n_variables, int am_threads);
     std::vector<std::vector<int>*>* initializePopulation();
-    std::vector<int>* evaluatePopulation();
+    std::vector<int>* evaluatePopulation(int start, int end, std::vector<int> *res);
     void next_gen();
     std::vector<int>* run();
     std::vector<int>* mutation(std::vector<int>* individual, int upper_limit, int lower_limit,
@@ -19,6 +19,7 @@ public:
     int maxim;
     int pop_size;
     int n_variables;
+    int am_of_threads;
     std::vector<std::vector<int>*>* population;
     std::default_random_engine generator;
 };

@@ -1,14 +1,16 @@
 
 #include <set>
+#include <thread>
 #include "genetic.h"
 
-Genetic::Genetic(int (*func)(std::vector<int>* values), int size_of_p = 100, int n_vars = 2){
+Genetic::Genetic(int (*func)(std::vector<int>* values), int size_of_p = 100, int n_vars = 2, int am_threads=4){
     f = func;
     minim = -100;
     maxim = 100;
     pop_size = size_of_p;
     n_variables = n_vars;
     population = initializePopulation();
+    am_of_threads = am_threads;
 }
 
 std::vector<std::vector<int>*>* Genetic::initializePopulation(){
@@ -24,14 +26,20 @@ std::vector<std::vector<int>*>* Genetic::initializePopulation(){
     return result_arr;
 }
 
-std::vector<int>* Genetic::evaluatePopulation(){
-    auto* result_arr = new std::vector<int>();
-    for(auto  i : (*population)){
-        result_arr->push_back((*f)(i));
-    }
-    return result_arr;
-}
+//std::vector<int>* Genetic::evaluatePopulation(){
+//    auto* result_arr = new std::vector<int>();
+//    for(auto  i : (*population)){
+//        result_arr->push_back((*f)(i));
+//    }
+//    return result_arr;
+//}
 
+std::vector<int>* Genetic::evaluatePopulation(int start, int end, std::vector<int> *res){
+    for (int i = start; i < end; i++){
+        (*res)[i] = (*f)((*population)[i]);
+    }
+    return res;
+}
 
 std::vector<int>* Genetic::mutation(std::vector<int>* individual, int upper_limit, int lower_limit,
                            int muatation_rate, std::string method, double standard_deviation){
@@ -53,15 +61,30 @@ std::vector<int>* Genetic::mutation(std::vector<int>* individual, int upper_limi
         }
     }
     return mutated_individual;
-
-
-
-
 }
 
 
 void Genetic::next_gen(){
-    auto results = evaluatePopulation();
+    auto* results = new std::vector<int>();
+    results->reserve(population->size());
+    for (int i = 0; i < population->size(); i++){
+        results->push_back(0);
+    }
+
+    std::vector<std::thread> vector_of_threads1;
+    vector_of_threads1.reserve(am_of_threads);
+    int part = population->size()/am_of_threads;
+    for (int i = 0; i < am_of_threads; i++) {
+        int end = part*(i+1);
+        if (i == am_of_threads-1){
+            end = population->size();
+        }
+        vector_of_threads1.emplace_back(&Genetic::evaluatePopulation, this, part*i, end, results);
+    }
+    for (auto &t: vector_of_threads1) {
+        t.join();
+    }
+
     auto children = new std::vector<std::vector<int>*>();
     auto smallest = std::min_element(results->begin(), results->end());
     int index = std::distance(results->begin(), smallest);
