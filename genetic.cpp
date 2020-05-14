@@ -1,4 +1,3 @@
-
 #include <set>
 #include <thread>
 #include "genetic.h"
@@ -13,26 +12,23 @@ Genetic::Genetic(int (*func)(std::vector<int>* values), int size_of_p = 100, int
     am_of_threads = am_threads;
 }
 
+int Genetic::getRand(int start, int end){
+        std::uniform_int_distribution<int> distribution(start, end);
+        return distribution(generator);
+}
+
+
 std::vector<std::vector<int>*>* Genetic::initializePopulation(){
     auto* result_arr = new std::vector<std::vector<int>*>();
     for(int i = 0; i < pop_size; i++){
         auto* curr_arr = new std::vector<int>();
         for(int j = 0; j < n_variables; j++) {
-            std::uniform_int_distribution<int> distribution(minim,maxim);
-            curr_arr->push_back(distribution(generator));
+            curr_arr->push_back(getRand(minim,maxim));
         }
         result_arr->push_back(curr_arr);
     }
     return result_arr;
 }
-
-//std::vector<int>* Genetic::evaluatePopulation(){
-//    auto* result_arr = new std::vector<int>();
-//    for(auto  i : (*population)){
-//        result_arr->push_back((*f)(i));
-//    }
-//    return result_arr;
-//}
 
 std::vector<int>* Genetic::evaluatePopulation(int start, int end, std::vector<int> *res){
     for (int i = start; i < end; i++){
@@ -45,26 +41,28 @@ std::vector<int>* Genetic::mutation(std::vector<int>* individual, int upper_limi
                            int muatation_rate, std::string method, double standard_deviation){
     auto* gene = new std::vector<int>();
     std::vector<int>* mutated_individual;
-    std::uniform_int_distribution<int> distribution3(0, 7);
-    gene->push_back(distribution3(generator));
-    for (int i = 0; i < muatation_rate - 1; i++){
-        gene->push_back(distribution3(generator));
-        while (std::set<int>( gene->begin(), gene->end() ).size() < gene->size()){
-            (*gene)[i] = distribution3(generator);
+    {
+        std::lock_guard<std::mutex> lg{m_m};
+        gene->push_back(getRand(0, 7));
+        for (int i = 0; i < muatation_rate - 1; i++){
+            gene->push_back(getRand(0, 7));
+            while (std::set<int>( gene->begin(), gene->end() ).size() < gene->size()){
+                (*gene)[i] = getRand(0, 7);
+            }
+            mutated_individual = new std::vector<int>((*individual));
         }
-        mutated_individual = new std::vector<int>((*individual));
     }
+
     if (method == "Reset"){
         for(int x = 0; x < muatation_rate; x++){
-            std::uniform_int_distribution<int> distribution4(lower_limit, upper_limit);
-            (*mutated_individual)[x] = distribution4(generator);
+            (*mutated_individual)[x] = getRand(lower_limit, upper_limit);
         }
     }
     return mutated_individual;
 }
 
 
-void Genetic::next_gen(){
+std::vector<int>* Genetic::getResults(){
     auto* results = new std::vector<int>();
     results->reserve(population->size());
     for (int i = 0; i < population->size(); i++){
@@ -84,109 +82,160 @@ void Genetic::next_gen(){
     for (auto &t: vector_of_threads1) {
         t.join();
     }
+    return results;
+}
+
+void Genetic::next_gen(){
+    auto* results = getResults();
 
     auto children = new std::vector<std::vector<int>*>();
     auto smallest = std::min_element(results->begin(), results->end());
     int index = std::distance(results->begin(), smallest);
     children->push_back((*population)[index]);
 
-
-
-    while (children->size() < pop_size){
-        std::vector<int>* p1;
-        std::vector<int>* p2;
-        std::uniform_int_distribution<int> distribution1(0,pop_size - 1);
-        int randA1 = distribution1(generator);
-        int randB1 = distribution1(generator);
-        if ((*results)[randA1] < (*results)[randB1]){
-            auto p1_1 = (*population)[randA1];
-            p1 = p1_1;
-
-        } else {
-            auto p1_1 = (*population)[randB1];
-            p1 = p1_1;
-        }
-
-        int randA2 = distribution1(generator);
-        int randB2 = distribution1(generator);
-        if ((*results)[randA2] < (*results)[randB2]){
-            auto p2_1 = (*population)[randA2];
-            p2 = p2_1;
-        } else {
-            auto p2_1 = (*population)[randB2];
-            p2 = p2_1;
-        }
-
-        auto signs = new std::vector<int>();
-        for(int i = 0; i < 2; i++){
-            if((*p1)[i] < 0 && (*p2)[i] < 0){
-                signs->push_back(-1);
-            } else if ((*p1)[i] >= 0 and (*p2)[i] >= 0){
-                signs->push_back(1);
-            }else{
-                std::discrete_distribution<int> distribution2 {-1,1};
-                signs->push_back(distribution2(generator));
-            }
-        }
-        auto* binary_p1 = new std::vector<std::string>();
-        auto* binary_p2 = new std::vector<std::string>();
-        for(auto i: (*p1)){
-            binary_p1->push_back(std::bitset<10>(abs(i)).to_string()); //to binary
-        }
-        for(auto i: (*p2)){
-            binary_p2->push_back(std::bitset<10>(abs(i)).to_string()); //to binary
-        }
-        auto child = new std::vector<std::string>();
-        for(int i = 0; i < binary_p1->size(); i++){
-            for(int j = 0; j < (*binary_p1)[i].size(); j++){
-                if ((*binary_p1)[i][j] == (*binary_p2)[i][j]){
-                    std::string s(1, (*binary_p1)[i][j]);
-                    child->push_back(s);
-                } else {
-                    std::uniform_int_distribution<int> distribution2(0, 1);
-                    int rand = distribution2(generator);
-                    child->push_back(std::to_string(rand));
-                }
-
-            }
-        }
-
-        std::string child_str;
-        for (const auto &piece : (*child)) child_str += piece;
-
-        std::vector<std::string> gens;
-        int prev = 0;
-        int amount_of_bits_in_one_variable = child->size() / n_variables;
-        int end = amount_of_bits_in_one_variable;
-        for (int i = 1; i < n_variables + 1; i++){
-            std::string g = child_str.substr(prev,end-prev);
-            gens.push_back(g);
-            prev = end;
-            end += amount_of_bits_in_one_variable;
-        }
-//
-//        std::vector<std::string> new_child;
-        auto new_child = new std::vector<int>();
-        for(int i = 0; i < gens.size(); i++){
-            new_child->push_back((*signs)[i] * stoi(gens[i], 0, 2));
-        }
-
-        new_child = mutation(new_child, maxim, minim);
-
-        children->push_back(new_child);
-
+    std::vector<std::thread> vector_of_threads2;
+    vector_of_threads2.reserve(am_of_threads);
+    for (int i = 0; i < am_of_threads; i++) {
+        vector_of_threads2.emplace_back(&Genetic::calcGeneration, this, children, results);
+    }
+    for (auto &t: vector_of_threads2) {
+        t.join();
     }
 
     population = children;
-
 }
+
+std::vector<int>* Genetic::random_parent(std::vector<int>* results){
+    std::vector<int>* parent;
+    int randA1 = getRand(0,pop_size - 1);
+    int randB1 = getRand(0,pop_size - 1);
+    if ((*results)[randA1] < (*results)[randB1]){
+        parent = (*population)[randA1];
+    } else {
+        parent = (*population)[randB1];
+    }
+    return parent;
+}
+
+std::vector<int>* Genetic::get_signs(std::vector<int>* p1, std::vector<int>* p2){
+    auto signs = new std::vector<int>();
+    for(int i = 0; i < n_variables; i++){
+        if((*p1)[i] < 0 && (*p2)[i] < 0){
+            signs->push_back(-1);
+        } else if ((*p1)[i] >= 0 and (*p2)[i] >= 0){
+            signs->push_back(1);
+        }else{
+            {
+                std::lock_guard<std::mutex> lg{m_m};
+                signs->push_back(getRand(-1,1));
+            }
+        }
+    }
+    return signs;
+}
+
+std::vector<std::string>* getCipher(std::vector<int>* parent){
+    auto* binary_parent = new std::vector<std::string>();
+    for(auto i: (*parent)){
+        binary_parent->push_back(std::bitset<10>(abs(i)).to_string()); //to binary
+    }
+    return binary_parent;
+}
+
+std::vector<int>* Genetic::getNewChild(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2, std::vector<int>* signs){
+    auto child = new std::vector<std::string>();
+    for(int i = 0; i < binary_p1->size(); i++){
+        for(int j = 0; j < (*binary_p1)[i].size(); j++){
+            if ((*binary_p1)[i][j] == (*binary_p2)[i][j]){
+                std::string s(1, (*binary_p1)[i][j]);
+                child->push_back(s);
+            } else {
+                int rand = getRand(0, 1);
+                child->push_back(std::to_string(rand));
+            }
+
+        }
+    }
+
+    std::string child_str;
+    for (const auto &piece : (*child)) child_str += piece;
+
+    std::vector<std::string> gens;
+    int prev = 0;
+    int amount_of_bits_in_one_variable = child->size() / n_variables;
+    int end = amount_of_bits_in_one_variable;
+    for (int i = 1; i < n_variables + 1; i++){
+        std::string g = child_str.substr(prev,end-prev);
+        gens.push_back(g);
+        prev = end;
+        end += amount_of_bits_in_one_variable;
+    }
+
+    auto new_child = new std::vector<int>();
+    for(int i = 0; i < gens.size(); i++){
+        new_child->push_back((*signs)[i] * stoi(gens[i], 0, 2));
+    }
+
+    return new_child;
+}
+
+std::vector<int>* Genetic::getParent(std::vector<int>* results, int method){
+    if (method == 0){
+        return random_parent(results);
+    }
+}
+
+
+void Genetic::calcGeneration(std::vector<std::vector<int>*>* children, std::vector<int>* results){
+    int p_size = 0;
+    {
+        std::lock_guard<std::mutex> lg{m_m};
+        p_size = children->size();
+    }
+    while (p_size < pop_size){
+        std::vector<int>* p1;
+        std::vector<int>* p2;
+        {
+            std::lock_guard<std::mutex> lg{m_m};
+            p1 = getParent(results);
+            p2 = getParent(results);
+        }
+
+        auto signs = get_signs(p1, p2);
+        auto* binary_p1 = getCipher(p1);
+        auto* binary_p2 = getCipher(p2);
+
+        std::vector<int>* new_child = getNewChild(binary_p1, binary_p2, signs);
+        new_child = mutation(new_child, maxim, minim);
+
+        {
+            std::lock_guard<std::mutex> lg{m_m};
+            children->push_back(new_child);
+        }
+
+        delete binary_p1;
+        delete binary_p2;
+        delete signs;
+        {
+            std::lock_guard<std::mutex> lg{m_m};
+            p_size = children->size();
+        }
+    }
+}
+
+
+
 std::vector<int>* Genetic::run(){
     int am_of_gens = 0;
-    while (am_of_gens < 1000){
+    while (am_of_gens < 2000){
         am_of_gens++;
         next_gen();
     }
     return (*population)[0];
+}
+
+Genetic::Genetic(Genetic const &genetic){
+
 }
 
 

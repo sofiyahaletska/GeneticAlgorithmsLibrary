@@ -4,16 +4,16 @@
 #include <random>
 #include <algorithm>
 #include <bitset>
+#include <mutex>
 
 class Genetic{
 public:
     Genetic(int (*f)(std::vector<int>* values), int pop_size, int n_variables, int am_threads);
-    std::vector<std::vector<int>*>* initializePopulation();
-    std::vector<int>* evaluatePopulation(int start, int end, std::vector<int> *res);
-    void next_gen();
+
+    Genetic(Genetic const &genetic);
+
     std::vector<int>* run();
-    std::vector<int>* mutation(std::vector<int>* individual, int upper_limit, int lower_limit,
-            int muatation_rate=2, std::string method="Reset", double standard_deviation=0.001);
+
     int (*f)(std::vector<int>* values);
     int minim;
     int maxim;
@@ -22,6 +22,23 @@ public:
     int am_of_threads;
     std::vector<std::vector<int>*>* population;
     std::default_random_engine generator;
+    mutable std::mutex m_m;
+    std::vector<int>* getParent(std::vector<int>* results, int method=0);
+
+private:
+
+    std::vector<int>* getResults();
+    std::vector<std::vector<int>*>* initializePopulation();
+    std::vector<int>* evaluatePopulation(int start, int end, std::vector<int> *res);
+    void calcGeneration(std::vector<std::vector<int>*>* children, std::vector<int>* results);
+    void next_gen();
+    std::vector<int>* mutation(std::vector<int>* individual, int upper_limit, int lower_limit,
+                               int muatation_rate=2, std::string method="Reset", double standard_deviation=0.001);
+    int getRand(int start, int end);
+
+    std::vector<int>* random_parent(std::vector<int>* results);
+    std::vector<int>* get_signs(std::vector<int>* p1, std::vector<int>* p2);
+    std::vector<int> * getNewChild(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2, std::vector<int>* signs);
 };
 
 
