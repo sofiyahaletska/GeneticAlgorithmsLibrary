@@ -1,5 +1,7 @@
 #include <set>
 #include <thread>
+#include <map>
+#include <iostream>
 #include "genetic.h"
 
 Genetic::Genetic(int (*func)(std::vector<int>* values), int size_of_p = 100, int n_vars = 2, int am_threads=4){
@@ -38,28 +40,46 @@ std::vector<int>* Genetic::evaluatePopulation(int start, int end, std::vector<in
 }
 
 std::vector<int>* Genetic::mutation(std::vector<int>* individual, int upper_limit, int lower_limit,
-                           int muatation_rate, std::string method, double standard_deviation){
-    auto* gene = new std::vector<int>();
-    std::vector<int>* mutated_individual;
-    {
-        std::lock_guard<std::mutex> lg{m_m};
-        gene->push_back(getRand(0, 7));
-        for (int i = 0; i < muatation_rate - 1; i++){
-            gene->push_back(getRand(0, 7));
-            while (std::set<int>( gene->begin(), gene->end() ).size() < gene->size()){
-                (*gene)[i] = getRand(0, 7);
-            }
-            mutated_individual = new std::vector<int>((*individual));
-        }
-    }
+                                    std::string method, int muatation_rate, double standard_deviation) {
 
-    if (method == "Reset"){
-        for(int x = 0; x < muatation_rate; x++){
+    std::vector<int> *mutated_individual;
+    mutated_individual = new std::vector<int>((*individual));
+
+    if (method == "Reset") {
+        for (int x = 0; x < muatation_rate; x++) {
             (*mutated_individual)[x] = getRand(lower_limit, upper_limit);
         }
     }
+
+    if (method == "Gauss") {
+        int mean;
+        for (int x = 0; x < muatation_rate - 1; x++) {
+
+            mean = ((*individual)[x] - (*individual)[x + 1]) / 2;
+            std::normal_distribution<> d{(double)mean, standard_deviation};
+            auto *hist = new std::map<int, int>();
+            for (int n = 0; n < 100; ++n) {
+                int rand = d(generator);
+                (*hist)[std::round(rand)]++;
+            }
+
+            int currentMax = 0;
+            int LocMax = 0;
+            for (auto it : *hist) {
+                if (it.second > currentMax) {
+                    if (lower_limit < it.first < upper_limit) {
+                        LocMax = it.first;
+                    }
+                }
+            }
+            (*mutated_individual)[x] = mean;
+            delete hist;
+        }
+    }
+
     return mutated_individual;
 }
+
 
 
 std::vector<int>* Genetic::getResults(){
@@ -153,8 +173,8 @@ std::vector<std::string>* Genetic::childSinglePoint(std::vector<std::string>* bi
             std::string s(1, (*binary_p1)[i][j]);
             child->push_back(s);
         }
-        for(int j = (*binary_p2)[i].size()/2; j < (*binary_p2)[i].size(); j++) {
-            std::string x(1, (*binary_p2)[i][j]);
+        for(int l = (*binary_p2)[i].size()/2; l < (*binary_p2)[i].size(); l++) {
+            std::string x(1, (*binary_p2)[i][l]);
             child->push_back(x);
         }
     }
@@ -211,15 +231,16 @@ std::vector<int>* Genetic::getNewChild(std::vector<std::string>* binary_p1,
     return new_child;
 }
 
-std::vector<std::vector<int>*>* Genetic::getParent(std::vector<int>* results, int &el1, int &el2, int method){
+std::vector<std::vector<int>*>* Genetic::getParent(std::vector<int>* results, int method){
     if (method == 1){
-        return getParentByFitness(results, el1, el2);
+        return getParentByFitness(results);
+
     }else{
         return randomParents(results);
     }
 }
 
-std::vector<std::vector<int>*>* Genetic::getParentByFitness(std::vector<int>* results, int &el1, int &el2){
+std::vector<std::vector<int>*>* Genetic::getParentByFitness(std::vector<int>* results){
     auto* parents = new std::vector<std::vector<int>*>();
     auto* cum_sum = new std::vector<int>();
     for (int i = 0; i < results->size(); i++) {
@@ -238,8 +259,7 @@ std::vector<std::vector<int>*>* Genetic::getParentByFitness(std::vector<int>* re
 
     p1 = (*population)[ind1];
     p2 = (*population)[ind2];
-    el1++;
-    el2++;
+
     parents->push_back(p1);
     parents->push_back(p2);
     return parents;
@@ -256,11 +276,15 @@ void Genetic::calcGeneration(std::vector<std::vector<int>*>* children, std::vect
     while (p_size < pop_size){
         std::vector<int>* p1;
         std::vector<int>* p2;
-        int el1 = 0;
-        int el2 = 1;
+
         {
             std::lock_guard<std::mutex> lg{m_m};
-            std::vector<std::vector<int>*>* parents = getParent(results, std::ref(el1), std::ref(el2), 1);
+            std::vector<std::vector<int>*>* parents = getParent(results, 1);
+            el1 = (el1 +1)%100;
+            el2 = (el2 +1)%100;
+            if ((*parents)[1] == NULL){
+                std::cout << "Error" << std::endl;
+            }
             p1 = (*parents)[0];
             p2 = (*parents)[1];
             delete parents;
@@ -271,7 +295,7 @@ void Genetic::calcGeneration(std::vector<std::vector<int>*>* children, std::vect
         auto* binary_p2 = getCipher(p2);
 
         std::vector<int>* new_child = getNewChild(binary_p1, binary_p2, signs, 1);
-        new_child = mutation(new_child, maxim, minim);
+        new_child = mutation(new_child, maxim, minim, "Gauss", 2);
 
         {
             std::lock_guard<std::mutex> lg{m_m};

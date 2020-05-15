@@ -23,11 +23,13 @@ public:
     std::vector<std::vector<int>*>* population;
     std::default_random_engine generator;
     mutable std::mutex m_m;
-    std::vector<std::vector<int>*>* getParent(std::vector<int>* results, int &el1, int &el2, int method=0);
+    std::vector<std::vector<int>*>* getParent(std::vector<int>* results, int method=0);
     std::vector<int>* getNewChild(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2, std::vector<int>* signs, int method=0);
 
 private:
-    std::vector<std::vector<int>*>* getParentByFitness(std::vector<int>* results, int &el1, int &el2);
+    int el1 = 0;
+    int el2 = 1;
+    std::vector<std::vector<int>*>* getParentByFitness(std::vector<int>* results);
     std::vector<std::string>* childSinglePoint(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2);
     std::vector<std::string>* childSemirandomBit(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2);
     std::vector<int>* getResults();
@@ -36,7 +38,7 @@ private:
     void calcGeneration(std::vector<std::vector<int>*>* children, std::vector<int>* results);
     void next_gen();
     std::vector<int>* mutation(std::vector<int>* individual, int upper_limit, int lower_limit,
-                               int muatation_rate=2, std::string method="Reset", double standard_deviation=0.001);
+                               std::string method="Reset", int muatation_rate=2, double standard_deviation=0.001);
     int getRand(int start, int end);
 
     std::vector<std::vector<int>*>* randomParents(std::vector<int>* results);
