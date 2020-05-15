@@ -22,18 +22,14 @@ long long to_us(const D& d)
 
 
 int func (std::vector<int>* lst){
-    int a = pow((*lst)[0], 4) - pow(4, (*lst)[0]); /// |x|-|y|
+    int a = pow((*lst)[0], 2) + 2*(*lst)[0]; /// x^4 - 4^x
     return a;
 }
 
-double funcD (std::vector<double>* lst){
-    double a = abs((*lst)[0]) - abs((*lst)[1]); /// |x|-|y|
-    return a;
-}
 
 int main() {
 
-    std::cout << "Function      K = |x|-|y|" << std::endl << std::flush;
+    std::cout << "Function      K = x^2 + 2*x" << std::endl << std::flush;
     Genetic gen = Genetic(&func, 100, 1, 4);
     auto start = get_current_time_fenced();
     std::vector<int>* minim = gen.run();

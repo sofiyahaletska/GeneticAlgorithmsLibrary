@@ -29,6 +29,7 @@ public:
 private:
     int el1 = 0;
     int el2 = 1;
+    std::vector<std::string>* getCipher(std::vector<int>* parent);
     std::vector<std::vector<int>*>* getParentByFitness(std::vector<int>* results);
     std::vector<std::string>* childSinglePoint(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2);
     std::vector<std::string>* childSemirandomBit(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2);
@@ -38,8 +39,13 @@ private:
     void calcGeneration(std::vector<std::vector<int>*>* children, std::vector<int>* results);
     void next_gen();
     std::vector<int>* mutation(std::vector<int>* individual, int upper_limit, int lower_limit,
-                               std::string method="Reset", int muatation_rate=2, double standard_deviation=0.001);
+                               int method=0, int muatation_rate=2, double standard_deviation=0.001);
     int getRand(int start, int end);
+
+    std::vector<int>* resetMutation(std::vector<int> *individual,
+                                             int lower_limit, int upper_limit, int muatation_rate=2);
+    std::vector<int>* gaussMutation(std::vector<int> *individual,
+                                    int lower_limit, int upper_limit, int muatation_rate=2, double standard_deviation=0.001);
 
     std::vector<std::vector<int>*>* randomParents(std::vector<int>* results);
     std::vector<int>* get_signs(std::vector<int>* p1, std::vector<int>* p2);
