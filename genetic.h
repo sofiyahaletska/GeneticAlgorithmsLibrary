@@ -23,10 +23,13 @@ public:
     std::vector<std::vector<int>*>* population;
     std::default_random_engine generator;
     mutable std::mutex m_m;
-    std::vector<int>* getParent(std::vector<int>* results, int method=0);
+    std::vector<std::vector<int>*>* getParent(std::vector<int>* results, int &el1, int &el2, int method=0);
+    std::vector<int>* getNewChild(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2, std::vector<int>* signs, int method=0);
 
 private:
-
+    std::vector<std::vector<int>*>* getParentByFitness(std::vector<int>* results, int &el1, int &el2);
+    std::vector<std::string>* childSinglePoint(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2);
+    std::vector<std::string>* childSemirandomBit(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2);
     std::vector<int>* getResults();
     std::vector<std::vector<int>*>* initializePopulation();
     std::vector<int>* evaluatePopulation(int start, int end, std::vector<int> *res);
@@ -36,7 +39,7 @@ private:
                                int muatation_rate=2, std::string method="Reset", double standard_deviation=0.001);
     int getRand(int start, int end);
 
-    std::vector<int>* random_parent(std::vector<int>* results);
+    std::vector<std::vector<int>*>* randomParents(std::vector<int>* results);
     std::vector<int>* get_signs(std::vector<int>* p1, std::vector<int>* p2);
     std::vector<int> * getNewChild(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2, std::vector<int>* signs);
 };

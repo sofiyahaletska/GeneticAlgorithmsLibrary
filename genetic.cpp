@@ -105,16 +105,20 @@ void Genetic::next_gen(){
     population = children;
 }
 
-std::vector<int>* Genetic::random_parent(std::vector<int>* results){
-    std::vector<int>* parent;
-    int randA1 = getRand(0,pop_size - 1);
-    int randB1 = getRand(0,pop_size - 1);
-    if ((*results)[randA1] < (*results)[randB1]){
-        parent = (*population)[randA1];
-    } else {
-        parent = (*population)[randB1];
+std::vector<std::vector<int>*>* Genetic::randomParents(std::vector<int>* results){
+    auto* parents = new std::vector<std::vector<int>*>();
+    for (int i = 0; i < 2; i++) {
+        std::vector<int>* parent;
+        int randA1 = getRand(0, pop_size - 1);
+        int randB1 = getRand(0, pop_size - 1);
+        if ((*results)[randA1] < (*results)[randB1]) {
+            parent = (*population)[randA1];
+        } else {
+            parent = (*population)[randB1];
+        }
+        parents->push_back(parent);
     }
-    return parent;
+    return parents;
 }
 
 std::vector<int>* Genetic::get_signs(std::vector<int>* p1, std::vector<int>* p2){
@@ -142,7 +146,22 @@ std::vector<std::string>* getCipher(std::vector<int>* parent){
     return binary_parent;
 }
 
-std::vector<int>* Genetic::getNewChild(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2, std::vector<int>* signs){
+std::vector<std::string>* Genetic::childSinglePoint(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2){
+    auto child = new std::vector<std::string>();
+    for(int i = 0; i < binary_p1->size(); i++){
+        for(int j = 0; j < (*binary_p1)[i].size()/2; j++) {
+            std::string s(1, (*binary_p1)[i][j]);
+            child->push_back(s);
+        }
+        for(int j = (*binary_p2)[i].size()/2; j < (*binary_p2)[i].size(); j++) {
+            std::string x(1, (*binary_p2)[i][j]);
+            child->push_back(x);
+        }
+    }
+    return child;
+}
+
+std::vector<std::string>* Genetic::childSemirandomBit(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2){
     auto child = new std::vector<std::string>();
     for(int i = 0; i < binary_p1->size(); i++){
         for(int j = 0; j < (*binary_p1)[i].size(); j++){
@@ -156,6 +175,19 @@ std::vector<int>* Genetic::getNewChild(std::vector<std::string>* binary_p1, std:
 
         }
     }
+    return child;
+}
+
+std::vector<int>* Genetic::getNewChild(std::vector<std::string>* binary_p1,
+        std::vector<std::string>* binary_p2, std::vector<int>* signs, int method){
+    std::vector<std::string>* child;
+    if (method == 1){
+        child = childSinglePoint(binary_p1, binary_p2);
+    } else {
+        child = childSemirandomBit(binary_p1, binary_p2);
+    }
+
+
 
     std::string child_str;
     for (const auto &piece : (*child)) child_str += piece;
@@ -179,11 +211,40 @@ std::vector<int>* Genetic::getNewChild(std::vector<std::string>* binary_p1, std:
     return new_child;
 }
 
-std::vector<int>* Genetic::getParent(std::vector<int>* results, int method){
-    if (method == 0){
-        return random_parent(results);
+std::vector<std::vector<int>*>* Genetic::getParent(std::vector<int>* results, int &el1, int &el2, int method){
+    if (method == 1){
+        return getParentByFitness(results, el1, el2);
+    }else{
+        return randomParents(results);
     }
 }
+
+std::vector<std::vector<int>*>* Genetic::getParentByFitness(std::vector<int>* results, int &el1, int &el2){
+    auto* parents = new std::vector<std::vector<int>*>();
+    auto* cum_sum = new std::vector<int>();
+    for (int i = 0; i < results->size(); i++) {
+        int a = (*results)[i];
+        cum_sum->emplace_back(a);
+    }
+    sort(cum_sum->begin(), cum_sum->end());
+
+    std::vector<int>* p1;
+    std::vector<int>* p2;
+
+    auto it1 = std::find(results->begin(), results->end(), (*cum_sum)[el1]);
+    int ind1 = std::distance(results->begin(), it1);
+    auto it2 = std::find(results->begin(), results->end(), (*cum_sum)[el2]);
+    int ind2 = std::distance(results->begin(), it2);
+
+    p1 = (*population)[ind1];
+    p2 = (*population)[ind2];
+    el1++;
+    el2++;
+    parents->push_back(p1);
+    parents->push_back(p2);
+    return parents;
+}
+
 
 
 void Genetic::calcGeneration(std::vector<std::vector<int>*>* children, std::vector<int>* results){
@@ -195,17 +256,21 @@ void Genetic::calcGeneration(std::vector<std::vector<int>*>* children, std::vect
     while (p_size < pop_size){
         std::vector<int>* p1;
         std::vector<int>* p2;
+        int el1 = 0;
+        int el2 = 1;
         {
             std::lock_guard<std::mutex> lg{m_m};
-            p1 = getParent(results);
-            p2 = getParent(results);
+            std::vector<std::vector<int>*>* parents = getParent(results, std::ref(el1), std::ref(el2), 1);
+            p1 = (*parents)[0];
+            p2 = (*parents)[1];
+            delete parents;
         }
 
         auto signs = get_signs(p1, p2);
         auto* binary_p1 = getCipher(p1);
         auto* binary_p2 = getCipher(p2);
 
-        std::vector<int>* new_child = getNewChild(binary_p1, binary_p2, signs);
+        std::vector<int>* new_child = getNewChild(binary_p1, binary_p2, signs, 1);
         new_child = mutation(new_child, maxim, minim);
 
         {
