@@ -3,11 +3,12 @@
 #include <map>
 #include <iostream>
 #include "genetic.h"
+#include "vizualization.h"
 
 Genetic::Genetic(int (*func)(std::vector<int>* values), int size_of_p = 100, int n_vars = 2, int am_threads=4){
     f = func;
-    minim = -100;
-    maxim = 100;
+    minim = -5;
+    maxim = 5;
     pop_size = size_of_p;
     n_variables = n_vars;
     population = initializePopulation();
@@ -295,7 +296,7 @@ void Genetic::calcGeneration(std::vector<std::vector<int>*>* children, std::vect
         auto* binary_p2 = getCipher(p2);
 
         std::vector<int>* new_child = getNewChild(binary_p1, binary_p2, signs, 1);
-        new_child = mutation(new_child, maxim, minim, "Gauss", 2);
+        new_child = mutation(new_child, maxim, minim, "Reset", 2);
 
         {
             std::lock_guard<std::mutex> lg{m_m};
@@ -315,11 +316,17 @@ void Genetic::calcGeneration(std::vector<std::vector<int>*>* children, std::vect
 
 
 std::vector<int>* Genetic::run(){
+    auto min_points = new std::vector<std::vector<int>*>();
     int am_of_gens = 0;
-    while (am_of_gens < 2000){
+    while (am_of_gens < 1000){
         am_of_gens++;
         next_gen();
+        min_points->push_back((*population)[0]);
     }
+    std::cout << "Minimum found      X = " << (*(*population)[0])[0] // << " Y = " << (*(*population)[0])[1]
+              //            <<" Z = " << (*minim)[2]<<" Z = " << (*minim)[3]<<" Z = " << (*minim)[4]
+              <<std::endl;
+    visualization(f, 2, min_points);
     return (*population)[0];
 }
 

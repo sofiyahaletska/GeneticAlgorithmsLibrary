@@ -2,7 +2,6 @@
 #define GAL_VIZUALIZATION_H
 #include <vector>
 
-void visualization(double(*func)(std::vector<double>*), int n);
-
+void visualization(int(*func)(std::vector<int>*), int n, std::vector<std::vector<int>*>* population);
 
 #endif //GAL_VIZUALIZATION_H
