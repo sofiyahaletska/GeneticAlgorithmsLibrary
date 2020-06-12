@@ -1,42 +1,38 @@
+#include <iostream>
 #include "genetic.h"
 
-std::vector<std::vector<int>*>* Genetic::getParentByFitness(std::vector<int>* results){
-    auto* parents = new std::vector<std::vector<int>*>();
-    auto* cum_sum = new std::vector<int>();
-    for (int i = 0; i < results->size(); i++) {
-        int a = (*results)[i];
-        cum_sum->emplace_back(a);
+int* Genetic::getParentByFitness(int* parents, int* results){
+
+    int cum_sum[pop_size];
+    for (int i = 0; i < pop_size; i++) {
+        int a = results[i];
+        cum_sum[i] = a;
     }
-    sort(cum_sum->begin(), cum_sum->end());
+    std::sort(cum_sum, cum_sum+pop_size);
 
-    std::vector<int>* p1;
-    std::vector<int>* p2;
+    int ind1 = findElementIndex(results, pop_size, cum_sum[el1]);
+    int ind2 = findElementIndex(results, pop_size, cum_sum[el2]);
 
-    auto it1 = std::find(results->begin(), results->end(), (*cum_sum)[el1]);
-    int ind1 = std::distance(results->begin(), it1);
-    auto it2 = std::find(results->begin(), results->end(), (*cum_sum)[el2]);
-    int ind2 = std::distance(results->begin(), it2);
-
-    p1 = (*population)[ind1];
-    p2 = (*population)[ind2];
-
-    parents->push_back(p1);
-    parents->push_back(p2);
+    for (int i=0; i < n_variables; i++){
+        parents[i] = population[ind1*n_variables+i];
+        parents[i+n_variables] = population[ind2*n_variables+i];
+    }
     return parents;
 }
 
-std::vector<std::vector<int>*>* Genetic::randomParents(std::vector<int>* results){
-    auto* parents = new std::vector<std::vector<int>*>();
+int* Genetic::randomParents(int* parents, const int* results){
     for (int i = 0; i < 2; i++) {
-        std::vector<int>* parent;
         int randA1 = getRand(0, pop_size - 1);
         int randB1 = getRand(0, pop_size - 1);
-        if ((*results)[randA1] < (*results)[randB1]) {
-            parent = (*population)[randA1];
+        if (results[randA1] < results[randB1]) {
+            for (int j = 0; j < n_variables; j++) {
+                parents[j+i*n_variables] = population[randA1 * n_variables + j];
+            }
         } else {
-            parent = (*population)[randB1];
+            for (int j = 0; j < n_variables; j++) {
+                parents[j+i*n_variables] = population[randB1 * n_variables + j];
+            }
         }
-        parents->push_back(parent);
     }
     return parents;
 }

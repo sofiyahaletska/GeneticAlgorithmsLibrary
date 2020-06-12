@@ -1,33 +1,34 @@
+#include <iostream>
 #include "genetic.h"
 
-std::vector<std::string>* Genetic::childSinglePoint(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2){
-    auto child = new std::vector<std::string>();
-    for(int i = 0; i < binary_p1->size(); i++){
-        for(int j = 0; j < (*binary_p1)[i].size()/2; j++) {
-            std::string s(1, (*binary_p1)[i][j]);
-            child->push_back(s);
+char* Genetic::childSinglePoint(char* binary_p1, char* binary_p2){
+    char* child = new char[10*n_variables];
+    for(int i = 0; i < n_variables; i++){
+        for(int j = 0; j < 5; j++) {
+
+            child[j+i*10] = binary_p1[(i*10)+j];
         }
-        for(int l = (*binary_p2)[i].size()/2; l < (*binary_p2)[i].size(); l++) {
-            std::string x(1, (*binary_p2)[i][l]);
-            child->push_back(x);
+        for(int l = 5; l < 10; l++) {
+            child[l+i*10] = binary_p2[(i*10)+l];
         }
     }
     return child;
 }
 
-std::vector<std::string>* Genetic::childSemirandomBit(std::vector<std::string>* binary_p1, std::vector<std::string>* binary_p2){
-    auto child = new std::vector<std::string>();
-    for(int i = 0; i < binary_p1->size(); i++){
-        for(int j = 0; j < (*binary_p1)[i].size(); j++){
-            if ((*binary_p1)[i][j] == (*binary_p2)[i][j]){
-                std::string s(1, (*binary_p1)[i][j]);
-                child->push_back(s);
-            } else {
-                int rand = getRand(0, 1);
-                child->push_back(std::to_string(rand));
-            }
+char* Genetic::childSemirandomBit(char* binary_p1, char* binary_p2){
+    char* child = new char[10*n_variables];
+//    std::cout << binary_p1 << std::endl;
+//    std::cout << binary_p2 << std::endl;
+    for(int i = 0; i < 10*n_variables; i++){
 
+        if (binary_p1[i] == binary_p2[i]){
+            child[i] = binary_p2[i];
+        } else {
+            int r = getRand(0, 1);
+            std::string str_rand = std::bitset<1>(abs(r)).to_string();
+            child[i] = str_rand[0];
         }
     }
+//    std::cout << child << std::endl;
     return child;
 }
