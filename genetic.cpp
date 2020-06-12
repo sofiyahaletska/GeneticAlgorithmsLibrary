@@ -1,5 +1,5 @@
 #include <set>
-#include <thread>
+//#include <thread>
 #include <map>
 #include <iostream>
 #include <atomic>
@@ -7,8 +7,8 @@
 #include "vizualization.h"
 
 int findSmallestElement(int arr[], int n){
-    int res = -1;
     int temp = arr[0];
+    int res = 0;
     for(int i=0; i<n; i++) {
         if(temp>arr[i]) {
             temp=arr[i];
@@ -30,10 +30,10 @@ int findElementIndex(int arr[], int n, int el){
     return res;
 }
 
-
 Genetic::Genetic(Genetic const &genetic){}
+Genetic::Genetic(){}
 
-Genetic::Genetic(int (*func)(int values[]), int size_of_p = 100, int n_vars = 2, int am_threads=4){
+void Genetic::construct(int (*func)(int values[]), int size_of_p, int n_vars, int am_threads){
     f = func;
     minim = -11;
     maxim = 11;
@@ -42,11 +42,7 @@ Genetic::Genetic(int (*func)(int values[]), int size_of_p = 100, int n_vars = 2,
     int* pop = new int[n_variables*size_of_p];
     population = initializePopulation(pop);
     am_of_threads = am_threads;
-//    for(int i = 0; i < pop_size; i++){
-//        for(int j = 0; j < n_variables; j++) {
-//            std::cout << population[j+(i*n_variables)] << std::endl;
-//        }
-//    }
+
 }
 
 int* Genetic::initializePopulation(int* pop){
@@ -83,34 +79,40 @@ std::vector<int>* Genetic::run(){
 //    visualization(f, 2, min_points);
     return res;
 }
-//
+////
 int* Genetic::getResults(int* results){
 //    int* results = new int[pop_size];
-    std::vector<std::thread> vector_of_threads1;
-    vector_of_threads1.reserve(am_of_threads);
-    int part = pop_size/am_of_threads;
-    for (int i = 0; i < am_of_threads; i++) {
-        int end = part*(i+1);
-        if (i == am_of_threads-1){
-            end = pop_size;
-        }
-        vector_of_threads1.emplace_back(&Genetic::evaluatePopulation, this, part*i, end, results);
-    }
-    for (auto &t: vector_of_threads1) {
-        t.join();
-    }
-//    evaluatePopulation(0, pop_size, results);
+//    std::vector<std::thread> vector_of_threads1;
+//    vector_of_threads1.reserve(am_of_threads);
+//    int part = pop_size/am_of_threads;
+//    for (int i = 0; i < am_of_threads; i++) {
+//        int end = part*(i+1);
+//        if (i == am_of_threads-1){
+//            end = pop_size;
+//        }
+////        vector_of_threads1.emplace_back(&Genetic::evaluatePopulation, this, part*i, end, results);
+//    }
+//    for (auto &t: vector_of_threads1) {
+//        t.join();
+//    }
+////    evaluatePopulation(0, pop_size, results);
     return results;
 }
 //
-void Genetic::evaluatePopulation(int start, int end, int *res){
+void Genetic::evaluatePopulation(int* pop, int start, int end, int *res){
     for (int i = start; i < end; i++){
-        int point[n_variables];
+        int* point = new int[n_variables];
         for(int j = 0; j < n_variables; j++) {
-            point[j] = population[i*n_variables+j];
+//            std::cout<< pop[i*n_variables+j] << std::endl;
+            if(pop[i*n_variables+j] > maxim){
+                pop[i*n_variables+j] = getRand(minim, maxim);
+            }
+            point[j] = pop[i*n_variables+j];
         }
         int a = (*f)(point);
+//        std::cout<< a<< std::endl;
         res[i] = a;
+
     }
 }
 
@@ -132,51 +134,39 @@ void Genetic::next_gen(){
 
     int* children_size = new int[1];
     children_size[0] = n_variables;
-    std::vector<std::thread> vector_of_threads2;
-    vector_of_threads2.reserve(am_of_threads);
-    for (int i = 0; i < am_of_threads; i++) {
-        vector_of_threads2.emplace_back(&Genetic::calcGeneration, this, children, results, children_size);
-    }
-    for (auto &t: vector_of_threads2) {
-        t.join();
-    }
+//    std::vector<std::thread> vector_of_threads2;
+//    vector_of_threads2.reserve(am_of_threads);
+//    for (int i = 0; i < am_of_threads; i++) {
+//        vector_of_threads2.emplace_back(&Genetic::calcGeneration, this, children, results, children_size);
+//    }
+//    for (auto &t: vector_of_threads2) {
+//        t.join();
+//    }
 //    calcGeneration(children, results, children_size);
 //
     population = children;
 }
 
-void Genetic::calcGeneration(int* children, int* results, int* children_size){
-    int p_size = 0;
-    {
-        std::lock_guard<std::mutex> lg{m_m};
-        p_size = children_size[0];
-    }
-    while (p_size < pop_size){
+void Genetic::calcGeneration(int* children, int* results, int amount){
+    int children_index = 0;
+    while (amount){
         int* p1 = new int[n_variables];
         int* p2 = new int[n_variables];
         int* pars = new int[2*n_variables];
         int* parents;
 
-        {
-            std::lock_guard<std::mutex> lg{m_m};
-            parents = getParent(pars, results, 0);
-            el1 = (el1 +1)%100;
-            el2 = (el2 +1)%100;
-//            if ((*parents)[1] == NULL){
-//                std::cout << "Error" << std::endl;
-//            }
-            for (int i = 0; i < n_variables; i++){
-                p1[i] = parents[i];
-            }
-            for (int i = 0; i < n_variables; i++){
-                p2[i] = parents[i+n_variables];
-            }
+        parents = getParent(pars, results, 0);
+        el1 = (el1 +1)%100;
+        el2 = (el2 +1)%100;
 
+        for (int i = 0; i < n_variables; i++){
+            p1[i] = parents[i];
         }
-//
+        for (int i = 0; i < n_variables; i++){
+            p2[i] = parents[i+n_variables];
+        }
 
         int* signs = get_signs(p1, p2);
-
 
         char* binary_p1 = getCipher(p1);
         char* binary_p2 = getCipher(p2);
@@ -184,29 +174,22 @@ void Genetic::calcGeneration(int* children, int* results, int* children_size){
         int* new_child = getNewChild(binary_p1, binary_p2, signs, 0);
         new_child = mutation(new_child, maxim, minim, 1, 2);
 
-        {
-            std::lock_guard<std::mutex> lg{m_m};
-            for (int i = 0; i< n_variables; i++){
-                if (new_child[i] > maxim || new_child[i] < minim){
-                    new_child[i] = getRand(minim, maxim);
-                }
+        for (int i = 0; i< n_variables; i++){
+            if (new_child[i] > maxim || new_child[i] < minim){
+                new_child[i] = getRand(minim, maxim);
             }
-            for(int i = 0; i < n_variables; i++){
-                children[children_size[0]+i] = new_child[i];
-            }
-            children_size[0] += n_variables;
         }
-//
+        for(int i = 0; i < n_variables; i++){
+            children[children_index] = new_child[i];
+            children_index++;
+        }
         delete binary_p1;
         delete binary_p2;
         delete signs;
-        {
-            std::lock_guard<std::mutex> lg{m_m};
-            p_size = children_size[0];
-        }
+        amount--;
     }
 }
-//
+
 int* Genetic::getParent(int* parents, int* results, int method){
     if (method == 1){
         return getParentByFitness(parents, results);
@@ -290,6 +273,7 @@ int* Genetic::mutation(int* individual, int upper_limit, int lower_limit,
 }
 //
 int Genetic::getRand(int start, int end){
-        std::uniform_int_distribution<int> distribution(start, end);
-        return distribution(generator);
+
+    std::uniform_int_distribution<int> distribution(start, end);
+    return distribution(generator);
 }
