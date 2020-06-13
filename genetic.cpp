@@ -1,10 +1,10 @@
 #include <set>
-//#include <thread>
+#include <thread>
 #include <map>
 #include <iostream>
 #include <atomic>
+#include <cstring>
 #include "genetic.h"
-#include "vizualization.h"
 
 int findSmallestElement(int arr[], int n){
     int temp = arr[0];
@@ -30,23 +30,24 @@ int findElementIndex(int arr[], int n, int el){
     return res;
 }
 
-Genetic::Genetic(Genetic const &genetic){}
-Genetic::Genetic(){}
 
-void Genetic::construct(int (*func)(int values[]), int size_of_p, int n_vars, int am_threads){
+Genetic::Genetic(Genetic const &genetic){}
+
+
+Genetic::Genetic(int (*func)(int values[]), int size_of_p, int n_vars, int am_threads){
     f = func;
-    minim = -11;
-    maxim = 11;
+    minim = -200;
+    maxim = 200;
     pop_size = size_of_p;
     n_variables = n_vars;
     int* pop = new int[n_variables*size_of_p];
     population = initializePopulation(pop);
     am_of_threads = am_threads;
-
 }
 
+
 int* Genetic::initializePopulation(int* pop){
-        for(int i = 0; i < pop_size; i++){
+    for(int i = 0; i < pop_size; i++){
         for(int j = 0; j < n_variables; j++) {
             int r = getRand(minim,maxim);
             pop[j+(i*n_variables)] = r;
@@ -54,141 +55,22 @@ int* Genetic::initializePopulation(int* pop){
     }
     return pop;
 }
-//
-std::vector<int>* Genetic::run(){
-    int min_points[1000*n_variables];
-    int am_of_gens = 0;
-    while (am_of_gens < 1000){
-        am_of_gens++;
-        next_gen();
-
-        for(int j = 0; j < n_variables; j++) {
-            min_points[j] = population[j];
-        }
 
 
-    }
-    std::vector<int>* res = new std::vector<int>();
-    for(int j = 0; j < n_variables; j++) {
-        res->push_back(population[j]);
-    }
-
-    std::cout << "Minimum found      X = " << (*res)[0] // << " Y = " << (*(*population)[0])[1]
-              //            <<" Z = " << (*minim)[2]<<" Z = " << (*minim)[3]<<" Z = " << (*minim)[4]
-              <<std::endl;
-//    visualization(f, 2, min_points);
-    return res;
-}
-////
-int* Genetic::getResults(int* results){
-//    int* results = new int[pop_size];
-//    std::vector<std::thread> vector_of_threads1;
-//    vector_of_threads1.reserve(am_of_threads);
-//    int part = pop_size/am_of_threads;
-//    for (int i = 0; i < am_of_threads; i++) {
-//        int end = part*(i+1);
-//        if (i == am_of_threads-1){
-//            end = pop_size;
-//        }
-////        vector_of_threads1.emplace_back(&Genetic::evaluatePopulation, this, part*i, end, results);
-//    }
-//    for (auto &t: vector_of_threads1) {
-//        t.join();
-//    }
-////    evaluatePopulation(0, pop_size, results);
-    return results;
-}
-//
 void Genetic::evaluatePopulation(int* pop, int start, int end, int *res){
     for (int i = start; i < end; i++){
-        int* point = new int[n_variables];
+        int point[n_variables];
         for(int j = 0; j < n_variables; j++) {
-//            std::cout<< pop[i*n_variables+j] << std::endl;
             if(pop[i*n_variables+j] > maxim){
                 pop[i*n_variables+j] = getRand(minim, maxim);
             }
             point[j] = pop[i*n_variables+j];
         }
         int a = (*f)(point);
-//        std::cout<< a<< std::endl;
         res[i] = a;
-
     }
 }
 
-void Genetic::next_gen(){
-    int res[pop_size];
-    int* results = getResults(res);
-//    for(int i = 0; i < pop_size; i++){
-//        for(int j = 0; j < n_variables; j++) {
-//            std::cout << results[j+(i*n_variables)] << std::endl;
-//        }
-//    }
-    int* children = new int[pop_size*n_variables];
-    int index = findSmallestElement(results, pop_size);
-
-    for (int i = 0; i < n_variables; i++){
-        children[i] = population[index*n_variables+i];
-
-    }
-
-    int* children_size = new int[1];
-    children_size[0] = n_variables;
-//    std::vector<std::thread> vector_of_threads2;
-//    vector_of_threads2.reserve(am_of_threads);
-//    for (int i = 0; i < am_of_threads; i++) {
-//        vector_of_threads2.emplace_back(&Genetic::calcGeneration, this, children, results, children_size);
-//    }
-//    for (auto &t: vector_of_threads2) {
-//        t.join();
-//    }
-//    calcGeneration(children, results, children_size);
-//
-    population = children;
-}
-
-void Genetic::calcGeneration(int* children, int* results, int amount){
-    int children_index = 0;
-    while (amount){
-        int* p1 = new int[n_variables];
-        int* p2 = new int[n_variables];
-        int* pars = new int[2*n_variables];
-        int* parents;
-
-        parents = getParent(pars, results, 0);
-        el1 = (el1 +1)%100;
-        el2 = (el2 +1)%100;
-
-        for (int i = 0; i < n_variables; i++){
-            p1[i] = parents[i];
-        }
-        for (int i = 0; i < n_variables; i++){
-            p2[i] = parents[i+n_variables];
-        }
-
-        int* signs = get_signs(p1, p2);
-
-        char* binary_p1 = getCipher(p1);
-        char* binary_p2 = getCipher(p2);
-
-        int* new_child = getNewChild(binary_p1, binary_p2, signs, 0);
-        new_child = mutation(new_child, maxim, minim, 1, 2);
-
-        for (int i = 0; i< n_variables; i++){
-            if (new_child[i] > maxim || new_child[i] < minim){
-                new_child[i] = getRand(minim, maxim);
-            }
-        }
-        for(int i = 0; i < n_variables; i++){
-            children[children_index] = new_child[i];
-            children_index++;
-        }
-        delete binary_p1;
-        delete binary_p2;
-        delete signs;
-        amount--;
-    }
-}
 
 int* Genetic::getParent(int* parents, int* results, int method){
     if (method == 1){
@@ -198,6 +80,7 @@ int* Genetic::getParent(int* parents, int* results, int method){
         return randomParents(parents, results);
     }
 }
+
 
 int* Genetic::get_signs(const int* p1, const int* p2){
     int* signs = new int[n_variables];
@@ -216,6 +99,7 @@ int* Genetic::get_signs(const int* p1, const int* p2){
     return signs;
 }
 
+
 char* Genetic::getCipher(int* parent){
     char* binary_parent = new char[n_variables*10];
     for(int i = 0; i < n_variables;i++){
@@ -226,6 +110,8 @@ char* Genetic::getCipher(int* parent){
     }
     return binary_parent;
 }
+
+
 int binaryToDecimal(char* n, int len) {
     char* num = n;
     int dec_value = 0;
@@ -239,6 +125,7 @@ int binaryToDecimal(char* n, int len) {
 
     return dec_value;
 }
+
 
 int* Genetic::getNewChild(char* binary_p1, char* binary_p2, int* signs, int method){
     char* child;
@@ -263,17 +150,19 @@ int* Genetic::getNewChild(char* binary_p1, char* binary_p2, int* signs, int meth
     return new_child;
 }
 
+
 int* Genetic::mutation(int* individual, int upper_limit, int lower_limit,
-                                    int method, int muatation_rate, double standard_deviation) {
+                       int method, int muatation_rate, double standard_deviation) {
     if(method == 1){
         return gaussMutation(individual, lower_limit, upper_limit);
     }else{
         return resetMutation(individual, lower_limit, upper_limit);
     }
 }
-//
-int Genetic::getRand(int start, int end){
 
+
+int Genetic::getRand(int start, int end){
     std::uniform_int_distribution<int> distribution(start, end);
     return distribution(generator);
 }
+
