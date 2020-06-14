@@ -34,15 +34,25 @@ int findElementIndex(int arr[], int n, int el){
 Genetic::Genetic(Genetic const &genetic){}
 
 
-Genetic::Genetic(int (*func)(int values[]), int size_of_p, int n_vars, int am_threads){
+Genetic::Genetic(int (*func)(int values[]), int n_vars, int size_of_p,
+                 int am_threads, int selection, int mating, int mutation,
+                 int lower_limit, int upper_limit, int mut_rate, int st_dev,
+                 int am_of_gens){
     f = func;
-    minim = -200;
-    maxim = 200;
+    minim = lower_limit;
+    maxim = upper_limit;
     pop_size = size_of_p;
     n_variables = n_vars;
     int* pop = new int[n_variables*size_of_p];
-    population = initializePopulation(pop);
+
     am_of_threads = am_threads;
+    selection_method = selection;
+    mating_method = mating;
+    mutation_method = mutation;
+    mutation_rate = mut_rate;
+    standard_deviation = st_dev;
+    am_of_generations = am_of_gens;
+    population = initializePopulation(pop);
 }
 
 
@@ -72,10 +82,10 @@ void Genetic::evaluatePopulation(int* pop, int start, int end, int *res){
 }
 
 
-int* Genetic::getParent(int* parents, int* results, int method){
-    if (method == 1){
+int* Genetic::getParent(int* parents, int* results){
+    if (selection_method == 1){
         return getParentByFitness(parents, results);
-    }if (method == 2){
+    }if (selection_method == 2){
         return getParentsByRouletteWheel(parents, results);
     }else{
         return randomParents(parents, results);
@@ -129,11 +139,11 @@ int binaryToDecimal(char* n, int len) {
 }
 
 
-int* Genetic::getNewChild(char* binary_p1, char* binary_p2, int* signs, int method){
+int* Genetic::getNewChild(char* binary_p1, char* binary_p2, int* signs){
     char* child;
-    if (method == 1){
+    if (mating_method == 1){
         child = childSinglePoint(binary_p1, binary_p2);
-    } if (method == 2){
+    } if (mating_method == 2){
         child = childTwoPoints(binary_p1, binary_p2);
     } else {
         child = childSemirandomBit(binary_p1, binary_p2);
@@ -155,16 +165,15 @@ int* Genetic::getNewChild(char* binary_p1, char* binary_p2, int* signs, int meth
 }
 
 
-int* Genetic::mutation(int* individual, int upper_limit, int lower_limit,
-                       int method, int muatation_rate, double standard_deviation) {
-    if(method == 1){
-        return gaussMutation(individual, lower_limit, upper_limit);
-    }if(method == 2){
+int* Genetic::mutation(int* individual) {
+    if(mutation_method == 1){
+        return gaussMutation(individual);
+    }if(mutation_method == 2){
         return swapMutation(individual);
-    }if(method == 3){
+    }if(mutation_method == 3){
         return inversionMutation(individual);
     }else{
-        return resetMutation(individual, lower_limit, upper_limit);
+        return resetMutation(individual);
     }
 }
 

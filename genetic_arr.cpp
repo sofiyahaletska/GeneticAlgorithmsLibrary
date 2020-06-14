@@ -2,10 +2,10 @@
 #include <thread>
 #include "genetic.h"
 
-std::vector<int>* Genetic::run(){
-    int min_points[1000*n_variables];
+int* Genetic::run(){
+    int min_points[am_of_generations*n_variables];
     int am_of_gens = 0;
-    while (am_of_gens < 1000){
+    while (am_of_gens < am_of_generations){
         am_of_gens++;
         next_gen();
 
@@ -14,17 +14,19 @@ std::vector<int>* Genetic::run(){
         }
     }
 
-    int* res_a = new int[n_variables];
-    std::vector<int>* res = new std::vector<int>();
-    for(int j = 0; j < n_variables; j++) {
-        res->push_back(population[j]);
-        res_a[j] = population[j];
-    }
-// << " Y = " << (*res)[1]
+    int* res_min_and_point = new int[n_variables+1];
+    int* res_point = new int[n_variables];
 
-    std::cout << "Minimum found      X = " << (*res)[0] <<std::endl;
-    std::cout << "F(x) = " << f(res_a) << std::endl;
-    return res;
+    for(int j = 1; j < n_variables+1; j++) {
+        res_min_and_point[j] = population[j-1];
+        res_point[j-1] = population[j-1];
+    }
+
+    res_min_and_point[0] = f(res_point);
+
+//    std::cout << "Minimum found      X = " << (*res)[0] <<std::endl;
+//    std::cout << "F(x) = " << f(res_a) << std::endl;
+    return res_min_and_point;
 }
 
 
@@ -64,8 +66,9 @@ void Genetic::next_gen(){
     for (auto &t: vector_of_threads2) {
         t.join();
     }
-    for (int i = 0; i < pop_size*n_variables; i++){
-        population[i] = children[i];
+
+    for(int j = 0; j < pop_size*n_variables; j++){
+        population[j] = children[j];
     }
 
     delete[] children;
@@ -101,7 +104,7 @@ void Genetic::calcGeneration(int* results, int amount, int*  children, int displ
         int* pars = new int[2*n_variables];
         int* parents;
 
-        parents = getParent(pars, results, 2);
+        parents = getParent(pars, results);
         el1 = (el1 +1)%100;
         el2 = (el2 +1)%100;
 
@@ -117,8 +120,8 @@ void Genetic::calcGeneration(int* results, int amount, int*  children, int displ
         char* binary_p1 = getCipher(p1);
         char* binary_p2 = getCipher(p2);
 
-        int* new_child = getNewChild(binary_p1, binary_p2, signs, 2);
-        new_child = mutation(new_child, maxim, minim, 1, 2);
+        int* new_child = getNewChild(binary_p1, binary_p2, signs);
+        new_child = mutation(new_child);
 
         for (int i = 0; i< n_variables; i++){
             if (new_child[i] > maxim || new_child[i] < minim){

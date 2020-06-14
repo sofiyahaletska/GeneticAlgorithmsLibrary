@@ -9,7 +9,7 @@ void Genetic::calcGeneration_mpi(int* children, int* results, int amount, int in
         int* pars = new int[2*n_variables];
         int* parents;
 
-        parents = getParent(pars, results, 2);
+        parents = getParent(pars, results);
         el1 = (el1 +1)%100;
         el2 = (el2 +1)%100;
 
@@ -25,8 +25,8 @@ void Genetic::calcGeneration_mpi(int* children, int* results, int amount, int in
         char* binary_p1 = getCipher(p1);
         char* binary_p2 = getCipher(p2);
 
-        int* new_child = getNewChild(binary_p1, binary_p2, signs, 2);
-        new_child = mutation(new_child, maxim, minim, 1, 2);
+        int* new_child = getNewChild(binary_p1, binary_p2, signs);
+        new_child = mutation(new_child);
 
         for (int i = 0; i< n_variables; i++){
             if (new_child[i] > maxim || new_child[i] < minim){

@@ -33,7 +33,7 @@ char* Genetic::childSemirandomBit(char* binary_p1, char* binary_p2){
     return child;
 }
 
-char* Genetic::childTwoPoints(char* binary_p1, char* binary_p2){
+char* Genetic::childTwoPoints(const char* binary_p1, const char* binary_p2){
     char* child = new char[10*n_variables];
     for(int i = 0; i < n_variables; i++){
         for(int j = 0; j < 2; j++) {
