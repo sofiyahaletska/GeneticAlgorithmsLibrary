@@ -11,7 +11,7 @@ add_executable(gal
         get_parent.cpp
         get_child.cpp
         get_mutation.cpp
-        )
+        genetic_arr.cpp)
 target_include_directories(gal PRIVATE ${PYTHON_INCLUDE_DIRS})
 target_link_libraries(gal Threads::Threads)
 target_link_libraries(gal ${PYTHON_LIBRARIES})

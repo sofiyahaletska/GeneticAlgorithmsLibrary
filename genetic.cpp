@@ -75,7 +75,8 @@ void Genetic::evaluatePopulation(int* pop, int start, int end, int *res){
 int* Genetic::getParent(int* parents, int* results, int method){
     if (method == 1){
         return getParentByFitness(parents, results);
-
+    }if (method == 2){
+        return getParentsByRouletteWheel(parents, results);
     }else{
         return randomParents(parents, results);
     }
@@ -92,7 +93,8 @@ int* Genetic::get_signs(const int* p1, const int* p2){
         }else{
             {
                 std::lock_guard<std::mutex> lg{m_m};
-                signs[i] = (getRand(-1,1));
+//                signs[i] = (getRand(-1,1));
+                signs[i] = 1;
             }
         }
     }
@@ -131,6 +133,8 @@ int* Genetic::getNewChild(char* binary_p1, char* binary_p2, int* signs, int meth
     char* child;
     if (method == 1){
         child = childSinglePoint(binary_p1, binary_p2);
+    } if (method == 2){
+        child = childTwoPoints(binary_p1, binary_p2);
     } else {
         child = childSemirandomBit(binary_p1, binary_p2);
     }
@@ -155,6 +159,10 @@ int* Genetic::mutation(int* individual, int upper_limit, int lower_limit,
                        int method, int muatation_rate, double standard_deviation) {
     if(method == 1){
         return gaussMutation(individual, lower_limit, upper_limit);
+    }if(method == 2){
+        return swapMutation(individual);
+    }if(method == 3){
+        return inversionMutation(individual);
     }else{
         return resetMutation(individual, lower_limit, upper_limit);
     }

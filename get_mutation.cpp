@@ -42,3 +42,27 @@ int* Genetic::gaussMutation(int *individual, int lower_limit,
     return individual;
 }
 
+// mutation for simpler genoms with small amount of gens
+int* Genetic::swapMutation(int* individual) {
+    if (n_variables != 1) {
+        int a = individual[0] ;
+        int b = individual[n_variables-1];
+        individual[0] = b;
+        individual[n_variables-1] = a;
+    }
+    return individual;
+}
+
+// mutation for complicated genoms with more than 3 gens
+int* Genetic::inversionMutation(int* individual) {
+    if (n_variables > 3) {
+        int middle = n_variables/2;
+        for (int i = 1; i < middle; i++) {
+            int a = individual[i] ;
+            int b = individual[n_variables-1-i];
+            individual[i] = b;
+            individual[n_variables-1-i] = a;
+        }
+    }
+    return individual;
+}

@@ -42,9 +42,10 @@ public:
 
     char* childSemirandomBit(char* binary_p1, char* binary_p2);
     int* getResults();
-
+    int* getParentsByRouletteWheel(int* parents, const int* results);
     void evaluatePopulation(int* pop, int start, int end, int *res);
-    void calcGeneration(int* children, int* results, int* children_size);
+    void calcGeneration(int* results, int amount, int*  children, int displs);
+    char* childTwoPoints(char* binary_p1, char* binary_p2);
     void next_gen();
     int* mutation(int* individual, int upper_limit, int lower_limit,
                                int method=0, int muatation_rate=2, double standard_deviation=0.001);
@@ -58,7 +59,8 @@ public:
     int* get_signs(const int* p1, const int* p2);
     int* getNewChild(char* binary_p1, char* binary_p2, int* signs, int method);
 
-
+    int* swapMutation(int* individual);
+    int* inversionMutation(int* individual);
 
 };
 
