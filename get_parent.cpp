@@ -2,7 +2,15 @@
 #include "genetic.h"
 
 int* Genetic::getParentByFitness(int* parents, int* results){
-
+     /**
+       * @brief This function perform selection of parent pairs according to
+       * their fitness. As the fittest individual will be paired with the fittest
+       *
+       * @param parents
+       * variable(place) where selected parents will be placed
+       * @param results
+       * results of fitness values for every parent
+    */
     int cum_sum[pop_size];
     for (int i = 0; i < pop_size; i++) {
         int a = results[i];
