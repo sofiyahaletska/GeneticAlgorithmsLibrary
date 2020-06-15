@@ -43,7 +43,7 @@
 
 організувати наявний код в бібліотеку, написати документацію та тести до неї
 
-##docs
+
 	Genetic algorithms are search procedures based on the mechanisms of natural selection and inheritance.
     They use the evolutionary principle of survival of the most adapted individuals.This library is designed to
     find the global minimum of a function using the benefits of genetic algorithms and is optimized in two ways.
