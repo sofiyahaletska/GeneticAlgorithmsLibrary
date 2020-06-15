@@ -5,6 +5,7 @@
 #include "genetic.h"
 #include <mpi.h>
 #include "function_to_calc.h"
+#include "additional_functions.h"
 
 int main(int argc, char** argv) {
     int commsize, rank, len;
@@ -25,16 +26,16 @@ int main(int argc, char** argv) {
 
     int* popul = new int[gen.pop_size*gen.n_variables];
 
-    while (am_of_gens < gen.am_of_generations) {
+    while (am_of_gens < 1) {
         if (rank == 0) {
             if (am_of_gens == 0) {
                 int part = gen.pop_size / (commsize - 1);
                 for (int i = 0; i < (commsize - 1); i++) {
-                    int end = part * gen.n_variables * (i + 1);
+                    int end = part * (i + 1)*gen.n_variables;
                     if (i == (commsize - 2)) {
-                        end = gen.pop_size * gen.n_variables;
+                        end = gen.pop_size*gen.n_variables;
                     }
-                    scount[i] = end - part * gen.n_variables * i;
+                    scount[i] = end - part  * i*gen.n_variables;
                 }
             }
         }
@@ -91,7 +92,12 @@ int main(int argc, char** argv) {
                 size = scount[rank - 1];
             }
             int *childs = new int[size];
-            gen.calcGeneration_mpi(childs, results, size / gen.n_variables, 0);
+
+            gen.calcGeneration_mpi(childs, results, size/gen.n_variables, 0);
+
+//        for(int i = 0; i < 2; i++){
+//            std::cout << childs[i] << std::endl;
+//        }
             MPI_Send(childs, size, MPI_INT, 0, 0, MPI_COMM_WORLD);
         }
         if (rank == 0) {
@@ -108,10 +114,14 @@ int main(int argc, char** argv) {
                          i + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 for (int j = 0; j < size; j++) {
                     children[new_pop_index] = part_children[j];
+
                     new_pop_index++;
                 }
             }
-            gen.population = children;
+//            gen.population = children;
+//            for(int j = 0; j < gen.n_variables*gen.pop_size; j++){
+//                std::cout << children[j] << std::endl;
+//            }
         }
         am_of_gens++;
     }
@@ -122,6 +132,7 @@ int main(int argc, char** argv) {
             res_min_and_point[j] = gen.population[j-1];
             res_point[j-1] = gen.population[j-1];
         }
+
         res_min_and_point[0] = gen.f(res_point);
         for(int j = 0; j < gen.n_variables+1; j++) {
             std::cout << res_min_and_point[j] << " " ;

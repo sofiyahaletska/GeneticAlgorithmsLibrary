@@ -1,9 +1,11 @@
 #include "genetic.h"
-
+#include "additional_functions.h"
+#include <iostream>
 
 void Genetic::calcGeneration_mpi(int* children, int* results, int amount, int index){
     int children_index = index;
-    while (amount){
+    while (amount > 0){
+        std::cout << amount << std::endl;
         int* p1 = new int[n_variables];
         int* p2 = new int[n_variables];
         int* pars = new int[2*n_variables];
@@ -25,22 +27,30 @@ void Genetic::calcGeneration_mpi(int* children, int* results, int amount, int in
         char* binary_p1 = getCipher(p1);
         char* binary_p2 = getCipher(p2);
 
-        int* new_child = getNewChild(binary_p1, binary_p2, signs);
-        new_child = mutation(new_child);
+        int* new_child = new int[n_variables];
 
-        for (int i = 0; i< n_variables; i++){
-            if (new_child[i] > maxim || new_child[i] < minim){
-                new_child[i] = getRand(minim, maxim);
-            }
-        }
+
+        new_child = getNewChild(binary_p1, binary_p2);
+
+//        new_child = mutation(new_child);
+
+
+//        for (int i = 0; i< n_variables; i++){
+//            if (new_child[i] > maxim || new_child[i] < minim){
+//                new_child[i] = getRand(minim, maxim);
+//            }
+//        }
+
         for(int i = 0; i < n_variables; i++){
             children[children_index] = new_child[i];
             children_index++;
+            amount = amount-1;
+
         }
         delete binary_p1;
         delete binary_p2;
         delete signs;
-        amount--;
+//        amount--;
     }
 }
 

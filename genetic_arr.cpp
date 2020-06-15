@@ -1,6 +1,7 @@
 #include <iostream>
 #include <thread>
 #include "genetic.h"
+#include "additional_functions.h"
 
 int* Genetic::run(){
     int min_points[am_of_generations*n_variables];
@@ -33,7 +34,8 @@ int* Genetic::run(){
 
 void Genetic::next_gen(){
     int* results = getResults();
-
+//    int* results = new int[pop_size];
+//    evaluatePopulation(population, 0, pop_size*n_variables, results);
     int* children = new int[pop_size*n_variables];
     int index = findSmallestElement(results, pop_size);
 
@@ -46,11 +48,11 @@ void Genetic::next_gen(){
     displs[0] = n_variables;
     int part = pop_size/am_of_threads ;
     for (int i = 0; i < am_of_threads; i++) {
-        int end = part * n_variables*(i + 1);
+        int end = part *(i + 1);
         if (i == (am_of_threads - 1)) {
-            end = (pop_size-1)*n_variables;
+            end = pop_size-1;
         }
-        scount[i] = end - part*n_variables * i;
+        scount[i] = end - part* i;
         if ( i != am_of_threads-1) {
             displs[i + 1] = displs[i] + scount[i];
         }
@@ -120,7 +122,7 @@ void Genetic::calcGeneration(int* results, int amount, int*  children, int displ
         char* binary_p1 = getCipher(p1);
         char* binary_p2 = getCipher(p2);
 
-        int* new_child = getNewChild(binary_p1, binary_p2, signs);
+        int* new_child = getNewChild(binary_p1, binary_p2);
         new_child = mutation(new_child);
 
         for (int i = 0; i< n_variables; i++){
