@@ -34,7 +34,7 @@ int main() {
     auto start = get_current_time_fenced();
     int *minim;
 
-    minim = find_global_min(1, &Goldenstein_Price_func, 2, 1, -2, 2, 100);
+    minim = find_global_min(1, &func, 2, 1, -2, 2, 100);
 
     std:: cout << to_us(get_current_time_fenced() - start) << std::endl;
     std::cout << "Function      K = x^2 + 2*x" << std::endl << std::flush;

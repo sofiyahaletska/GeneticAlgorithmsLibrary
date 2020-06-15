@@ -8,6 +8,10 @@
 #include "additional_functions.h"
 
 int main(int argc, char** argv) {
+    /**
+    * @brief This function is the main function when one is using
+    * MPI as a type of parallelization.
+    */
     int commsize, rank, len;
     char procname[MPI_MAX_PROCESSOR_NAME];
     MPI_Init(&argc, &argv);
@@ -18,24 +22,24 @@ int main(int argc, char** argv) {
     int am_of_gens = 0;
 
     Genetic gen = Genetic(&func, std::atoi(argv[1]), std::atoi(argv[2]), commsize,
-            std::atoi(argv[3]), std::atoi(argv[4]), std::atoi(argv[5]), std::atoi(argv[6]),
-            std::atoi(argv[7]), std::atoi(argv[8]), std::atoi(argv[9]), std::atoi(argv[10]));
+                          std::atoi(argv[3]), std::atoi(argv[4]), std::atoi(argv[5]), std::atoi(argv[6]),
+                          std::atoi(argv[7]), std::atoi(argv[8]), std::atoi(argv[9]), std::atoi(argv[10]));
 
     int* results = new int[gen.pop_size];
     int* children = new int[gen.pop_size*gen.n_variables];
 
     int* popul = new int[gen.pop_size*gen.n_variables];
 
-    while (am_of_gens < 1) {
+    while (am_of_gens < gen.am_of_generations) {
         if (rank == 0) {
             if (am_of_gens == 0) {
                 int part = gen.pop_size / (commsize - 1);
                 for (int i = 0; i < (commsize - 1); i++) {
-                    int end = part * (i + 1)*gen.n_variables;
+                    int end = part * (i + 1);
                     if (i == (commsize - 2)) {
-                        end = gen.pop_size*gen.n_variables;
+                        end = gen.pop_size ;
                     }
-                    scount[i] = end - part  * i*gen.n_variables;
+                    scount[i] = end - part * i;
                 }
             }
         }
@@ -92,12 +96,7 @@ int main(int argc, char** argv) {
                 size = scount[rank - 1];
             }
             int *childs = new int[size];
-
-            gen.calcGeneration_mpi(childs, results, size/gen.n_variables, 0);
-
-//        for(int i = 0; i < 2; i++){
-//            std::cout << childs[i] << std::endl;
-//        }
+            gen.calcGeneration_mpi(childs, results, size / gen.n_variables, 0);
             MPI_Send(childs, size, MPI_INT, 0, 0, MPI_COMM_WORLD);
         }
         if (rank == 0) {
@@ -114,14 +113,10 @@ int main(int argc, char** argv) {
                          i + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 for (int j = 0; j < size; j++) {
                     children[new_pop_index] = part_children[j];
-
                     new_pop_index++;
                 }
             }
-//            gen.population = children;
-//            for(int j = 0; j < gen.n_variables*gen.pop_size; j++){
-//                std::cout << children[j] << std::endl;
-//            }
+            gen.population = children;
         }
         am_of_gens++;
     }
@@ -132,7 +127,6 @@ int main(int argc, char** argv) {
             res_min_and_point[j] = gen.population[j-1];
             res_point[j-1] = gen.population[j-1];
         }
-
         res_min_and_point[0] = gen.f(res_point);
         for(int j = 0; j < gen.n_variables+1; j++) {
             std::cout << res_min_and_point[j] << " " ;
