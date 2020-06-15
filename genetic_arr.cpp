@@ -3,6 +3,11 @@
 #include "genetic.h"
 
 int* Genetic::run(){
+    /**
+    * @brief This function that performs the main part of the algorithm
+    * It generates certain amount of generating, finding minimum of the function and the point
+    * where this minimum is reached and returning it.
+    */
     int min_points[am_of_generations*n_variables];
     int am_of_gens = 0;
     while (am_of_gens < am_of_generations){
@@ -23,15 +28,18 @@ int* Genetic::run(){
     }
 
     res_min_and_point[0] = f(res_point);
-
-//    std::cout << "Minimum found      X = " << (*res)[0] <<std::endl;
-//    std::cout << "F(x) = " << f(res_a) << std::endl;
+    
     return res_min_and_point;
 }
 
 
 
 void Genetic::next_gen(){
+    /**
+    * @brief This function that generate next generating of individuals.
+    * It divides current generation into parts for every thread, calculates new
+    * generation children
+    */
     int* results = getResults();
 
     int* children = new int[pop_size*n_variables];
@@ -76,6 +84,10 @@ void Genetic::next_gen(){
 }
 
 int* Genetic::getResults(){
+    /**
+    * @brief This function calculates the fitness values of gen sequences
+    * in certain amount of threads and returns the results
+    */
     int* results = new int[pop_size];
     std::vector<std::thread> vector_of_threads1;
     vector_of_threads1.reserve(am_of_threads);
@@ -96,6 +108,29 @@ int* Genetic::getResults(){
 
 
 void Genetic::calcGeneration(int* results, int amount, int*  children, int displs){
+    /**
+    * @brief This function is private and used in our library to calculate the generation when one is using
+    * std::threads as a type of parallelization.
+    * In this function selection of parents, children making and mutation are called.
+    * The function has parameters as follows:
+    *
+    * @param results
+    * This is a buffer with the results of calculating the function at certain points,
+    * which was calculated in the previous step, to be more precise, in the function evaluatePopulation.
+    * The required argument type is int*.
+    *
+    * @param amount
+    * This is a parameter that determines how many children you need to create.
+    * The required argument type is int.
+    *
+    * @param children
+    *This is a buffer that is passed to the function as a parameter,
+    *and as a result of the function it will be filled with a new generation.
+    * The required argument type is int*.
+    *
+    * @param displs
+
+    */
     int children_index = displs;
     while (amount){
 
