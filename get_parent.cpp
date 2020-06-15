@@ -3,7 +3,11 @@
 #include "additional_functions.h"
 
 int* Genetic::getParentByFitness(int* parents, int* results){
+<<<<<<< HEAD
     /**
+=======
+     /**
+>>>>>>> 8badea96779bd60a17738de0f0be4d586bc938d3
        * @brief This function perform selection of parent pairs according to
        * their fitness. As the fittest individual will be paired with the fittest
        *
