@@ -1,0 +1,1 @@
+You should put folder "gal" in your /usr/share folder to use this library
