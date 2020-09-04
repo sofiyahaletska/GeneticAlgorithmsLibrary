@@ -48,6 +48,7 @@ target_link_libraries(${PROJECT_NAME} ${GAL_LIBRARY})
 
 ```
 8.Make #include <find_minimum.h>
+
 9.Call a function in your code with the appropriate parameters (find_global_min ())
 
 ### Data
