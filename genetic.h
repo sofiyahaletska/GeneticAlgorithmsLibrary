@@ -6,9 +6,6 @@
 #include <bitset>
 #include <mutex>
 
-int binaryToDecimal(char* n, int len);
-int findElementIndex(int arr[], int n, int el);
-int findSmallestElement(int arr[], int n);
 
 class Genetic{
 public:
@@ -45,16 +42,16 @@ public:
     int el2 = 1;
 
     int* initializePopulation(int* pop);
-    char* getCipher(int* parent);
+    char* getCipher(int* parent) const;
     int* getParentByFitness(int* parents, int* results);
-    char* childSinglePoint(char* binary_p1, char* binary_p2);
+    char* childSinglePoint(const char* binary_p1, const char* binary_p2) const;
 
-    char* childSemirandomBit(char* binary_p1, char* binary_p2);
+    char* childSemirandomBit(const char* binary_p1, const char* binary_p2);
     int* getResults();
     int* getParentsByRouletteWheel(int* parents, const int* results);
     void evaluatePopulation(int* pop, int start, int end, int *res);
     void calcGeneration(int* results, int amount, int*  children, int displs);
-    char* childTwoPoints(const char* binary_p1, const char* binary_p2);
+    char* childTwoPoints(const char* binary_p1, const char* binary_p2) const;
     void next_gen();
     int* mutation(int* individual);
     int getRand(int start, int end);
@@ -62,9 +59,9 @@ public:
     int* resetMutation(int* individual);
     int* gaussMutation(int *individual);
 
-    int* randomParents(int* parents, const int* results);
-    int* get_signs(const int* p1, const int* p2);
-    int* getNewChild(char* binary_p1, char* binary_p2, int* signs);
+    int* tournamentParent(int* parents, const int* results);
+    int* get_signs(const int* p1, const int* p2) const;
+    int* getNewChild(char* binary_p1, char* binary_p2);
 
     int* swapMutation(int* individual);
     int* inversionMutation(int* individual);

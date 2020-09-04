@@ -5,8 +5,13 @@
 #include "genetic.h"
 #include <mpi.h>
 #include "function_to_calc.h"
+#include "additional_functions.h"
 
 int main(int argc, char** argv) {
+    /**
+    * @brief This function is the main function when one is using
+    * MPI as a type of parallelization.
+    */
     int commsize, rank, len;
     char procname[MPI_MAX_PROCESSOR_NAME];
     MPI_Init(&argc, &argv);
@@ -17,8 +22,8 @@ int main(int argc, char** argv) {
     int am_of_gens = 0;
 
     Genetic gen = Genetic(&func, std::atoi(argv[1]), std::atoi(argv[2]), commsize,
-            std::atoi(argv[3]), std::atoi(argv[4]), std::atoi(argv[5]), std::atoi(argv[6]),
-            std::atoi(argv[7]), std::atoi(argv[8]), std::atoi(argv[9]), std::atoi(argv[10]));
+                          std::atoi(argv[3]), std::atoi(argv[4]), std::atoi(argv[5]), std::atoi(argv[6]),
+                          std::atoi(argv[7]), std::atoi(argv[8]), std::atoi(argv[9]), std::atoi(argv[10]));
 
     int* results = new int[gen.pop_size];
     int* children = new int[gen.pop_size*gen.n_variables];
@@ -30,11 +35,11 @@ int main(int argc, char** argv) {
             if (am_of_gens == 0) {
                 int part = gen.pop_size / (commsize - 1);
                 for (int i = 0; i < (commsize - 1); i++) {
-                    int end = part * gen.n_variables * (i + 1);
+                    int end = part * (i + 1);
                     if (i == (commsize - 2)) {
-                        end = gen.pop_size * gen.n_variables;
+                        end = gen.pop_size ;
                     }
-                    scount[i] = end - part * gen.n_variables * i;
+                    scount[i] = end - part * i;
                 }
             }
         }

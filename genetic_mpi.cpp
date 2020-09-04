@@ -1,4 +1,6 @@
 #include "genetic.h"
+#include "additional_functions.h"
+#include <iostream>
 
 
 void Genetic::calcGeneration_mpi(int* children, int* results, int amount, int index){
@@ -25,7 +27,7 @@ void Genetic::calcGeneration_mpi(int* children, int* results, int amount, int in
         char* binary_p1 = getCipher(p1);
         char* binary_p2 = getCipher(p2);
 
-        int* new_child = getNewChild(binary_p1, binary_p2, signs);
+        int* new_child = getNewChild(binary_p1, binary_p2);
         new_child = mutation(new_child);
 
         for (int i = 0; i< n_variables; i++){
@@ -43,4 +45,3 @@ void Genetic::calcGeneration_mpi(int* children, int* results, int amount, int in
         amount--;
     }
 }
-

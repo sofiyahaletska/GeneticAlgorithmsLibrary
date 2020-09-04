@@ -12,7 +12,7 @@ add_executable(gal
         get_parent.cpp
         get_child.cpp
         get_mutation.cpp
-        genetic_arr.cpp find_minimum.cpp function_to_calc.cpp function_to_calc.h find_minimum.h)
+        genetic_arr.cpp find_minimum.cpp function_to_calc.cpp function_to_calc.h find_minimum.h additional_functions.cpp additional_functions.h get_methods.cpp)
 target_include_directories(gal PRIVATE ${PYTHON_INCLUDE_DIRS})
 target_link_libraries(gal Threads::Threads)
 target_link_libraries(gal ${PYTHON_LIBRARIES})
