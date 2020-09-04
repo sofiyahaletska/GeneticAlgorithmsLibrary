@@ -17,6 +17,8 @@ Unlike most optimization algorithms, genetic algorithms do not use derivatives t
 
 ## Library + Incoming and outgoing data
 
+### Library
+
 In order to use our project as a library you need:
 1. Download the gal folder from this repository.
 2. Place it in the directory with libraries on your device (ubuntu users have /usr/share)
@@ -54,7 +56,6 @@ target_link_libraries(${PROJECT_NAME} ${GAL_LIBRARY})
 ### Data
 Receives an input function for optimization, GA parameters (population size, probability of mutations, etc.), way of parallelization(MPI, std::thread) and search for its minimum.
 
-### Library
 
 ## Genetic Algorithms
 Our genetic algorithm contains 7 parts:
