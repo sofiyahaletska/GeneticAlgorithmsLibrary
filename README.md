@@ -42,16 +42,14 @@ Constructing the next generation - combining earlier selected and newly made ind
 
 In our GA Pairing, Mating and Mutation can be performed by several different approaches - details in the picture. So in result of mixing approaches of different parts among them, our library contains not just one GA, but 36 different combinations of stages, that roughly speaking is 36 different GAs.
 
-![](https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/Screenshot%20from%202020-09-04%2010-59-09.png?raw=true)
-
+<img src="https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/Screenshot%20from%202020-09-04%2010-59-09.png?raw=true" width="600">
 
 
 Note: swap mutation and inversion mutation - for functions with a large number of variables
 
 ## Paralization
 
-<img src="https://github.com/sophiakravchuk/GeneticAlgorithmsLibrary/blob/master/img/stages_mult_final.png" width="500">
-
+<img src="https://github.com/sophiakravchuk/GeneticAlgorithmsLibrary/blob/master/img/stages_mult_final.png" width="600" align="center">
 
 In our project, we used two types of multithreading: std::thread and MPI.
 
