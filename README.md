@@ -16,6 +16,40 @@ Unlike most optimization algorithms, genetic algorithms do not use derivatives t
 
 
 ## Library + Incoming and outgoing data
+
+In order to use our project as a library you need:
+1. Download the gal folder from this repository.
+2. Place it in the directory with libraries on your device (ubuntu users have /usr/share)
+3. In your project in Clion, create a folder named 'cmake'.
+4. In the folder, create a file called 'FindGAL.cmake'
+5. Copy the script below and paste into FindGAL.cmake, add your locations where requested(read text inside the stars, after inserting text, no stars should remain.)
+```
+set( FIND_GAL_PATHS *path to the gal folder (ubuntu users - /usr/share/gal)* )
+ 
+find_path( GAL_INCLUDE_DIR find_minimum.h
+           PATH_SUFFIXES include
+           PATHS ${FIND_GAL_PATHS} )
+find_library(GAL_LIBRARY
+               NAMES gal
+               PATH_SUFFIXES lib
+               PATHS ${FIND_GAL_PATHS} )
+ ```
+6. Paste the script below in your Cmakelist.txt file between sets (CMAKE_CXX_STANDARD X(X reder to standard of c++ that you use) ) and add_executable( ... )
+ 
+```
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+```
+7. Paste the script below in your Cmakelist.txt file after add_executable( ... )
+```
+include(FindPkgConfig)
+find_package(GAL REQUIRED)
+include_directories(${GAL_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} ${GAL_LIBRARY})
+
+```
+8.Make #include <find_minimum.h>
+9.Call a function in your code with the appropriate parameters (find_global_min ())
+
 ### Data
 Receives an input function for optimization, GA parameters (population size, probability of mutations, etc.), way of parallelization(MPI, std::thread) and search for its minimum.
 
