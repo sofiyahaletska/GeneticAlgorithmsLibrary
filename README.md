@@ -49,7 +49,7 @@ In our GA Pairing, Mating and Mutation can be performed by several different app
 Note: swap mutation and inversion mutation - for functions with a large number of variables
 
 ## Paralization
-![](https://github.com/sophiakravchuk/GeneticAlgorithmsLibrary/blob/master/img/stages_mult_final.png  =250x)
+![](https://github.com/sophiakravchuk/GeneticAlgorithmsLibrary/blob/master/img/stages_mult_final.png){: width="250px"}
 
 In our project, we used two types of multithreading: std::thread and MPI.
 
