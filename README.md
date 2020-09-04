@@ -1,5 +1,8 @@
 # Genetic Algorithms Library
 
+## Team
+Sophia Kravchuk, Julia Pochynok, Sophia Haletska
+
 ## Description
 Library for optimizing multidimensional functions using genetic algorithms.
 
@@ -42,10 +45,6 @@ To run the project you will need to download this repository and run command in 
 
 
 ## Documentation
-
-## Team
-Sophia Kravchuk, Julia Pochynok, Sophia Haletska
-
 
 	Genetic algorithms are search procedures based on the mechanisms of natural selection and inheritance.
     They use the evolutionary principle of survival of the most adapted individuals.This library is designed to
