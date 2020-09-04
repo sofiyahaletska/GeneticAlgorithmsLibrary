@@ -49,7 +49,10 @@ In our GA Pairing, Mating and Mutation can be performed by several different app
 Note: swap mutation and inversion mutation - for functions with a large number of variables
 
 ## Paralization
+![](https://github.com/sophiakravchuk/GeneticAlgorithmsLibrary/blob/master/img/stages_mult_final.png)
 
+In our project, we used two types of multithreading: std::thread and MPI.
+Our parallelization consists of two parts, as it is shown in the image above. First of all, we are counting our resulting population in part Selection in threads. Also, the main process from Pairing to Mutation is held with pairs of individuals from the old population in multiple threads.
 
 ## Usage & Testing
 While testing all 36 different GAs we found the most optimal and the least optimal combinations of stages.
