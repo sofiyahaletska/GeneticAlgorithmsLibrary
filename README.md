@@ -6,9 +6,11 @@ Sophia Kravchuk, Julia Pochynok, Sophia Haletska
 ## Description
 Library for optimizing multidimensional functions using genetic algorithms.
 
+
 Genetic algorithms are search procedures based on the mechanisms of natural selection and inheritance. They use the evolutionary principle of survival of the most adapted individuals.
 
-КАРТИНКАААААААААААААААААААААААААААААААААААААААААААААА
+![](https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/Screenshot%20from%202020-09-04%2010-55-37.png?raw=true)
+
 
 Unlike most optimization algorithms, genetic algorithms do not use derivatives to find minimum. One of the most significant advantages of genetic algorithms is their ability to find the global minimum without focusing on local minimum. Randomness plays a significant role in the structure of genetic algorithms, and this is the main reason why genetic algorithms continue to search for search space.
 
@@ -21,23 +23,68 @@ Receives an input function for optimization, GA parameters (population size, pro
 
 ## Genetic Algorithms
 Our genetic algorithm contains 7 parts:
+
+
 Initialization - defining our population
+
 Fitness Calculation - calculate the fitness value of gens using the given function
+
 Selection - select part of individuals that will be contained in next generation
+
 Pairing - select pairs of parents from our population which can mate and create their off-springs
+
 Mating(Crossover) -  we have selected parent chromosomes that will produce off-springs. So in biological terms, the crossover is a reproduction, generating gens for off-springs.
+
 Mutation - change in the genes of children which makes them different from their parents.
+
 Constructing the next generation - combining earlier selected and newly made individuals to construct the nest generation
 
-In our GA Pairing, Mating and Mutation can be performed by several different approaches - details in the picture. So in result of mixing approaches of different parts among them, our library contains not just one GA, but 32 different combinations of stages, that roughly speaking is 32 different GAs.
 
-КАРТИНКААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААА
+In our GA Pairing, Mating and Mutation can be performed by several different approaches - details in the picture. So in result of mixing approaches of different parts among them, our library contains not just one GA, but 36 different combinations of stages, that roughly speaking is 36 different GAs.
+
+![](https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/Screenshot%20from%202020-09-04%2010-59-09.png?raw=true)
+
+
+
 Note: swap mutation and inversion mutation - for functions with a large number of variables
 
 ## Paralization
 
 
-## Usage Example/Testing
+## Usage & Testing
+While testing all 36 different GAs we found the most optimal and the least optimal combinations of stages.
+We performed our testing on Goldstein-Price function, which is:
+
+![](https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/Screenshot%20from%202020-09-04%2021-57-20.png?raw=true)
+
+
+For functions with a small number of variables the best combinations are:
+0 -> 2 -> 0 
+
+![](https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/020.png?raw=true)
+
+0 -> 0 -> 0 
+
+![](https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/000.png?raw=true)
+
+For functions with a small number of variables the best combinations are:
+
+0 -> 0 -> 2 
+
+![](https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/002.png?raw=true)
+
+0 -> 0 -> 3 
+
+![](https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/003.png?raw=true)
+
+The least optimal combinations are:
+2 -> 0 -> 0 
+
+![](https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/200.png?raw=true)
+
+1 -> 0 -> 1 
+
+![](https://github.com/juliapochynok/GeneticAlgorithmsLibrary/blob/master/img/101.png?raw=true)
 
 
 ## Run Dependencies
