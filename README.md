@@ -19,6 +19,7 @@ Unlike most optimization algorithms, genetic algorithms do not use derivatives t
 
 ### Library
 Our main function called find_minimum.
+
 If you are not familiar with the parameters and capabilities of the find_minimum function, we suggest you read the documentation.
 
 
